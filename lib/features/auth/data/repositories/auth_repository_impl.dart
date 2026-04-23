@@ -28,11 +28,27 @@ class AuthRepositoryImpl implements AuthRepository {
   UserModel? login(String email, String password) {
     try {
       return _box.values.firstWhere(
-        (u) => u.email.toLowerCase() == email.toLowerCase().trim() && u.password == password,
+        (u) =>
+            u.email.toLowerCase() == email.toLowerCase().trim() &&
+            u.password == password,
       );
     } catch (_) {
       return null;
     }
+  }
+
+  @override
+  UserModel update(UserModel user) {
+    final normalizedEmail = user.email.toLowerCase().trim();
+    final existing = _box.values.where(
+      (u) => u.id != user.id && u.email.toLowerCase().trim() == normalizedEmail,
+    );
+    if (existing.isNotEmpty) {
+      throw Exception('Email already exists');
+    }
+
+    _box.put(user.id, user);
+    return user;
   }
 
   @override
@@ -42,7 +58,8 @@ class AuthRepositoryImpl implements AuthRepository {
     required String password,
     required String avatarColor,
   }) {
-    final existing = _box.values.where((u) => u.email.toLowerCase() == email.toLowerCase().trim());
+    final existing = _box.values
+        .where((u) => u.email.toLowerCase() == email.toLowerCase().trim());
     if (existing.isNotEmpty) {
       throw Exception('Email already exists');
     }

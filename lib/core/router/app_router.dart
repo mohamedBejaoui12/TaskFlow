@@ -87,32 +87,41 @@ class AppShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return Scaffold(
       body: child,
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _index(),
-        destinations: const [
-          NavigationDestination(icon: Icon(Icons.dashboard_outlined), label: 'Dashboard'),
-          NavigationDestination(icon: Icon(Icons.folder_copy_outlined), label: 'Projects'),
-          NavigationDestination(icon: Icon(Icons.task_alt_outlined), label: 'Tasks'),
-          NavigationDestination(icon: Icon(Icons.settings_outlined), label: 'Settings'),
-        ],
-        onDestinationSelected: (index) {
-          switch (index) {
-            case 0:
-              context.go('/dashboard');
-              break;
-            case 1:
-              context.go('/projects');
-              break;
-            case 2:
-              context.go('/tasks');
-              break;
-            case 3:
-              context.go('/settings');
-              break;
-          }
-        },
+      bottomNavigationBar: Container(
+        padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+        color: Colors.transparent,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(22),
+          child: NavigationBar(
+            backgroundColor: scheme.surfaceContainerLow,
+            selectedIndex: _index(),
+            destinations: const [
+              NavigationDestination(icon: Icon(Icons.dashboard_outlined), label: 'Dashboard'),
+              NavigationDestination(icon: Icon(Icons.folder_copy_outlined), label: 'Projects'),
+              NavigationDestination(icon: Icon(Icons.task_alt_outlined), label: 'Tasks'),
+              NavigationDestination(icon: Icon(Icons.settings_outlined), label: 'Settings'),
+            ],
+            onDestinationSelected: (index) {
+              switch (index) {
+                case 0:
+                  context.go('/dashboard');
+                  break;
+                case 1:
+                  context.go('/projects');
+                  break;
+                case 2:
+                  context.go('/tasks');
+                  break;
+                case 3:
+                  context.go('/settings');
+                  break;
+              }
+            },
+          ),
+        ),
       ),
     );
   }

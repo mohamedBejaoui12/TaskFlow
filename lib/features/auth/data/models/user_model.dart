@@ -33,4 +33,19 @@ class UserModel implements UserEntity {
   @HiveField(4)
   @override
   final String avatarColor;
+
+  UserModel copyWith({
+    String? name,
+    String? email,
+    String? password,
+    String? avatarColor,
+  }) {
+    return UserModel(
+      id: id,
+      name: name ?? this.name,
+      email: email ?? this.email,
+      password: password ?? this.password,
+      avatarColor: avatarColor ?? this.avatarColor,
+    );
+  }
 }

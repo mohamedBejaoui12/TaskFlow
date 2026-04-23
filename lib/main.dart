@@ -50,6 +50,7 @@ class TaskFlowApp extends ConsumerWidget {
 
     return MaterialApp.router(
       title: 'TaskFlow',
+      debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
       themeMode: themeMode,

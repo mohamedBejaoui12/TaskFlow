@@ -1,3 +1,4 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -5,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../features/auth/presentation/providers/auth_providers.dart';
 import '../../../../features/projects/presentation/providers/projects_providers.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/widgets/app_backdrop.dart';
 import '../../../../shared/widgets/user_avatar.dart';
 import '../../data/models/task_model.dart';
 import '../providers/tasks_providers.dart';
@@ -114,96 +116,229 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
     final l10n = AppLocalizations.of(context)!;
     final projects = ref.watch(projectsProvider);
     final users = ref.watch(allUsersProvider);
+    final scheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      appBar: AppBar(title: Text(_editing == null ? l10n.createTask : l10n.editTask)),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          Form(
-            key: _formKey,
-            child: Column(
-              children: [
-                TextFormField(
-                  controller: _titleCtrl,
-                  decoration: InputDecoration(labelText: l10n.title),
-                  validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
-                ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: _descriptionCtrl,
-                  maxLines: 3,
-                  decoration: InputDecoration(labelText: l10n.description),
-                  validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
-                ),
-                const SizedBox(height: 12),
-                DropdownButtonFormField<String>(
-                  value: _projectId,
-                  items: projects
-                      .map((p) => DropdownMenuItem<String>(value: p.id, child: Text(p.name)))
-                      .toList(),
-                  onChanged: (value) => setState(() => _projectId = value),
-                  decoration: InputDecoration(labelText: l10n.projects),
-                ),
-                const SizedBox(height: 12),
-                DropdownButtonFormField<String>(
-                  value: _status,
-                  items: const [
-                    DropdownMenuItem(value: 'todo', child: Text('todo')),
-                    DropdownMenuItem(value: 'inProgress', child: Text('inProgress')),
-                    DropdownMenuItem(value: 'done', child: Text('done')),
-                  ],
-                  onChanged: (value) => setState(() => _status = value ?? 'todo'),
-                  decoration: InputDecoration(labelText: l10n.status),
-                ),
-                const SizedBox(height: 12),
-                DropdownButtonFormField<String>(
-                  value: _priority,
-                  items: const [
-                    DropdownMenuItem(value: 'low', child: Text('low')),
-                    DropdownMenuItem(value: 'medium', child: Text('medium')),
-                    DropdownMenuItem(value: 'high', child: Text('high')),
-                  ],
-                  onChanged: (value) => setState(() => _priority = value ?? 'medium'),
-                  decoration: InputDecoration(labelText: l10n.priority),
-                ),
-                const SizedBox(height: 12),
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(l10n.dueDate),
-                  subtitle: Text(_dueDate?.toLocal().toString().split(' ').first ?? '-'),
-                  trailing: IconButton(
-                    onPressed: _pickDate,
-                    icon: const Icon(Icons.event_outlined),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                DropdownButtonFormField<String?>(
-                  value: _assigneeId,
-                  items: [
-                    const DropdownMenuItem<String?>(value: null, child: Text('Unassigned')),
-                    ...users.map(
-                      (u) => DropdownMenuItem<String?>(
-                        value: u.id,
-                        child: Row(
+      body: AppBackdrop(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            FadeInUp(
+              duration: const Duration(milliseconds: 400),
+              child: Card(
+                clipBehavior: Clip.antiAlias,
+                child: Padding(
+                  padding: const EdgeInsets.all(18),
+                  child: Row(
+                    children: [
+                      Container(
+                        height: 52,
+                        width: 52,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              scheme.primary.withValues(alpha: 0.18),
+                              scheme.tertiary.withValues(alpha: 0.16),
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child:
+                            Icon(Icons.add_task_rounded, color: scheme.primary),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            UserAvatar(user: u, radius: 12),
-                            const SizedBox(width: 8),
-                            Text(u.name),
+                            Text(
+                              _editing == null
+                                  ? l10n.createTask
+                                  : l10n.editTask,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleLarge
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Plan the task, assign ownership, and set the pace',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(
+                                    color: scheme.onSurfaceVariant,
+                                  ),
+                            ),
                           ],
                         ),
                       ),
-                    ),
-                  ],
-                  onChanged: (value) => setState(() => _assigneeId = value),
-                  decoration: InputDecoration(labelText: l10n.assignee),
+                    ],
+                  ),
                 ),
-              ],
+              ),
             ),
-          ),
-          const SizedBox(height: 16),
-          FilledButton(onPressed: _save, child: Text(l10n.save)),
-        ],
+            const SizedBox(height: 12),
+            FadeInUp(
+              delay: const Duration(milliseconds: 100),
+              child: Card(
+                clipBehavior: Clip.antiAlias,
+                child: Padding(
+                  padding: const EdgeInsets.all(18),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Task details',
+                          style:
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                        ),
+                        const SizedBox(height: 14),
+                        TextFormField(
+                          controller: _titleCtrl,
+                          decoration: InputDecoration(labelText: l10n.title),
+                          validator: (v) => (v == null || v.trim().isEmpty)
+                              ? 'Required'
+                              : null,
+                        ),
+                        const SizedBox(height: 12),
+                        TextFormField(
+                          controller: _descriptionCtrl,
+                          maxLines: 3,
+                          decoration:
+                              InputDecoration(labelText: l10n.description),
+                          validator: (v) => (v == null || v.trim().isEmpty)
+                              ? 'Required'
+                              : null,
+                        ),
+                        const SizedBox(height: 12),
+                        DropdownButtonFormField<String>(
+                          value: _projectId,
+                          items: projects
+                              .map((p) => DropdownMenuItem<String>(
+                                  value: p.id, child: Text(p.name)))
+                              .toList(),
+                          onChanged: (value) =>
+                              setState(() => _projectId = value),
+                          decoration: InputDecoration(labelText: l10n.projects),
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: DropdownButtonFormField<String>(
+                                value: _status,
+                                items: const [
+                                  DropdownMenuItem(
+                                      value: 'todo', child: Text('todo')),
+                                  DropdownMenuItem(
+                                      value: 'inProgress',
+                                      child: Text('inProgress')),
+                                  DropdownMenuItem(
+                                      value: 'done', child: Text('done')),
+                                ],
+                                onChanged: (value) =>
+                                    setState(() => _status = value ?? 'todo'),
+                                decoration:
+                                    InputDecoration(labelText: l10n.status),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: DropdownButtonFormField<String>(
+                                value: _priority,
+                                items: const [
+                                  DropdownMenuItem(
+                                      value: 'low', child: Text('low')),
+                                  DropdownMenuItem(
+                                      value: 'medium', child: Text('medium')),
+                                  DropdownMenuItem(
+                                      value: 'high', child: Text('high')),
+                                ],
+                                onChanged: (value) => setState(
+                                    () => _priority = value ?? 'medium'),
+                                decoration:
+                                    InputDecoration(labelText: l10n.priority),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            FadeInUp(
+              delay: const Duration(milliseconds: 200),
+              child: Card(
+                clipBehavior: Clip.antiAlias,
+                child: Padding(
+                  padding: const EdgeInsets.all(18),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Planning',
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                ),
+                      ),
+                      const SizedBox(height: 12),
+                      ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: Text(l10n.dueDate),
+                        subtitle: Text(
+                            _dueDate?.toLocal().toString().split(' ').first ??
+                                'Not set'),
+                        trailing: IconButton(
+                          onPressed: _pickDate,
+                          icon: const Icon(Icons.event_outlined),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      DropdownButtonFormField<String?>(
+                        value: _assigneeId,
+                        items: [
+                          const DropdownMenuItem<String?>(
+                              value: null, child: Text('Unassigned')),
+                          ...users.map(
+                            (u) => DropdownMenuItem<String?>(
+                              value: u.id,
+                              child: Row(
+                                children: [
+                                  UserAvatar(user: u, radius: 12),
+                                  const SizedBox(width: 8),
+                                  Text(u.name),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                        onChanged: (value) =>
+                            setState(() => _assigneeId = value),
+                        decoration: InputDecoration(labelText: l10n.assignee),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            FilledButton(onPressed: _save, child: Text(l10n.save)),
+          ],
+        ),
       ),
     );
   }

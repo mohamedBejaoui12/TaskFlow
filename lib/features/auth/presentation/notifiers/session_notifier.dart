@@ -44,6 +44,27 @@ class SessionNotifier extends StateNotifier<UserModel?> {
     return user;
   }
 
+  UserModel updateProfile({
+    required String name,
+    required String email,
+    required String avatarColor,
+  }) {
+    final current = state;
+    if (current == null) {
+      throw Exception('No active session');
+    }
+
+    final updated = _repository.update(
+      current.copyWith(
+        name: name.trim(),
+        email: email.trim(),
+        avatarColor: avatarColor,
+      ),
+    );
+    state = updated;
+    return updated;
+  }
+
   Future<void> logout() async {
     state = null;
     await _prefs.remove(SharedPrefsKeys.sessionUserId);

@@ -1,3 +1,4 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,6 +8,7 @@ import '../../../../core/utils/color_utils.dart';
 import '../../../../core/utils/icon_utils.dart';
 import '../../../../features/auth/presentation/providers/auth_providers.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/widgets/app_backdrop.dart';
 import '../../../../shared/widgets/user_avatar.dart';
 import '../../data/models/project_model.dart';
 import '../providers/projects_providers.dart';
@@ -102,74 +104,192 @@ class _ProjectFormScreenState extends ConsumerState<ProjectFormScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final allUsers = ref.watch(allUsersProvider);
+    final scheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      appBar: AppBar(title: Text(_editing == null ? l10n.createProject : l10n.editProject)),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          Form(
-            key: _formKey,
-            child: Column(
-              children: [
-                TextFormField(
-                  controller: _nameCtrl,
-                  decoration: InputDecoration(labelText: l10n.projectName),
-                  validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
+      body: AppBackdrop(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            FadeInUp(
+              duration: const Duration(milliseconds: 400),
+              child: Card(
+                clipBehavior: Clip.antiAlias,
+                child: Padding(
+                  padding: const EdgeInsets.all(18),
+                  child: Row(
+                    children: [
+                      Container(
+                        height: 52,
+                        width: 52,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              scheme.primary.withValues(alpha: 0.18),
+                              scheme.tertiary.withValues(alpha: 0.16),
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Icon(Icons.folder_copy_outlined,
+                            color: scheme.primary),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              _editing == null
+                                  ? l10n.createProject
+                                  : l10n.editProject,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleLarge
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Shape the project, its identity, and its team',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(
+                                    color: scheme.onSurfaceVariant,
+                                  ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: _descriptionCtrl,
-                  maxLines: 3,
-                  decoration: InputDecoration(labelText: l10n.description),
-                  validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    const Text('Color'),
-                    const SizedBox(width: 8),
-                    GestureDetector(
-                      onTap: _pickColor,
-                      child: CircleAvatar(backgroundColor: _color),
-                    ),
-                    const SizedBox(width: 24),
-                    const Text('Icon'),
-                    const SizedBox(width: 8),
-                    DropdownButton<String>(
-                      value: _icon,
-                      items: IconUtils.iconMap.keys
-                          .map((key) => DropdownMenuItem(value: key, child: Text(key)))
-                          .toList(),
-                      onChanged: (value) => setState(() => _icon = value!),
-                    ),
-                  ],
-                ),
-              ],
+              ),
             ),
-          ),
-          const SizedBox(height: 20),
-          Text(l10n.members, style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 10),
-          ...allUsers.map(
-            (u) => CheckboxListTile(
-              value: _memberIds.contains(u.id),
-              title: Text(u.name),
-              secondary: UserAvatar(user: u),
-              onChanged: (checked) {
-                setState(() {
-                  if (checked ?? false) {
-                    _memberIds.add(u.id);
-                  } else {
-                    _memberIds.remove(u.id);
-                  }
-                });
-              },
+            const SizedBox(height: 12),
+            FadeInUp(
+              delay: const Duration(milliseconds: 100),
+              child: Card(
+                clipBehavior: Clip.antiAlias,
+                child: Padding(
+                  padding: const EdgeInsets.all(18),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Project details',
+                          style:
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                        ),
+                        const SizedBox(height: 14),
+                        TextFormField(
+                          controller: _nameCtrl,
+                          decoration:
+                              InputDecoration(labelText: l10n.projectName),
+                          validator: (v) => (v == null || v.trim().isEmpty)
+                              ? 'Required'
+                              : null,
+                        ),
+                        const SizedBox(height: 12),
+                        TextFormField(
+                          controller: _descriptionCtrl,
+                          maxLines: 3,
+                          decoration:
+                              InputDecoration(labelText: l10n.description),
+                          validator: (v) => (v == null || v.trim().isEmpty)
+                              ? 'Required'
+                              : null,
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: ListTile(
+                                contentPadding: EdgeInsets.zero,
+                                title: const Text('Color'),
+                                subtitle: const Text('Project accent'),
+                                trailing: GestureDetector(
+                                  onTap: _pickColor,
+                                  child: CircleAvatar(backgroundColor: _color),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: DropdownButtonFormField<String>(
+                                value: _icon,
+                                decoration:
+                                    const InputDecoration(labelText: 'Icon'),
+                                items: IconUtils.iconMap.keys
+                                    .map((key) => DropdownMenuItem(
+                                        value: key, child: Text(key)))
+                                    .toList(),
+                                onChanged: (value) =>
+                                    setState(() => _icon = value!),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             ),
-          ),
-          const SizedBox(height: 16),
-          FilledButton(onPressed: _save, child: Text(l10n.save)),
-        ],
+            const SizedBox(height: 12),
+            FadeInUp(
+              delay: const Duration(milliseconds: 200),
+              child: Card(
+                clipBehavior: Clip.antiAlias,
+                child: Padding(
+                  padding: const EdgeInsets.all(18),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.members,
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                ),
+                      ),
+                      const SizedBox(height: 8),
+                      ...allUsers.map(
+                        (u) => CheckboxListTile(
+                          value: _memberIds.contains(u.id),
+                          title: Text(u.name),
+                          secondary: UserAvatar(user: u),
+                          contentPadding: EdgeInsets.zero,
+                          controlAffinity: ListTileControlAffinity.leading,
+                          onChanged: (checked) {
+                            setState(() {
+                              if (checked ?? false) {
+                                _memberIds.add(u.id);
+                              } else {
+                                _memberIds.remove(u.id);
+                              }
+                            });
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            FilledButton(onPressed: _save, child: Text(l10n.save)),
+          ],
+        ),
       ),
     );
   }
