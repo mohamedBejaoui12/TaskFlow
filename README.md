@@ -1,16 +1,58 @@
-# task_flow
+# TaskFlow
 
-A new Flutter project.
+TaskFlow is a Flutter application for organizing projects, tasks, and team productivity workflows.
+
+## Tech Stack
+
+- Flutter
+- Dart
+- Material Design 3
+
+## Project Structure
+
+```
+lib/
+  core/        # App-wide constants, routing, theme, utils, and error handling
+  features/    # Domain features (auth, dashboard, projects, settings, tasks)
+  l10n/        # Localization files and generated localization classes
+  shared/      # Shared reusable widgets
+```
+
+## Prerequisites
+
+- Flutter SDK (stable)
+- Dart SDK (bundled with Flutter)
+- Android Studio or VS Code with Flutter extensions
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+1. Install dependencies:
 
-A few resources to get you started if this is your first Flutter project:
+	```bash
+	flutter pub get
+	```
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+2. Run the app:
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+	```bash
+	flutter run
+	```
+
+3. Run tests:
+
+	```bash
+	flutter test
+	```
+
+## Localization
+
+This project includes English and French localization resources in `lib/l10n/`.
+
+## Supported Platforms
+
+- Android
+- iOS
+- Web
+- Linux
+- macOS
+- Windows
